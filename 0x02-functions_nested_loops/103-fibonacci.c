@@ -1,6 +1,6 @@
 #include <stdio.h>
 /**
- * main - a program that finds and prints the sum of the even-valued terms under 4 Million.
+ * main - sum even fibonacci numbers under 4 million.
  * Return: Nothing.
  */
 int main(void)
