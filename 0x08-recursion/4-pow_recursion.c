@@ -7,7 +7,7 @@
  *
  * Return: The result of x raised to the power of y, or -1 if y is negative
  *
- * Author: Silas Mugambi
+ * Author: 254Wizard
  */
 int _pow_recursion(int x, int y)
 {
