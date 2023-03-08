@@ -33,7 +33,7 @@ int _sqrt_helper(int n, int i)
  * Return: The natural square root of n, or -1 if n does not have a natural
  * square root
  *
- * Author: Silas Mugambi
+ * Author: 254Wizard
  */
 int _sqrt_recursion(int n)
 {
