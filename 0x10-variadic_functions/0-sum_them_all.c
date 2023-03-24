@@ -3,6 +3,7 @@
 
 /**
  * sum_them_all - Variadic function that takes in a variable number of
+ *
  * arguments and returns the sum of them all
  * @n: Number of arguments being passed into the function
  * Return: The sum of all arguments
