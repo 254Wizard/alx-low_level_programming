@@ -7,7 +7,7 @@
  * @k: The value to be modified
  * Return: The number of bits
  */
-unsigned int flip_bits(unsigned long int n, unsigned long int m)
+unsigned int flip_bits(unsigned long int j, unsigned long int k)
 {
 	unsigned int bits_num;
 
