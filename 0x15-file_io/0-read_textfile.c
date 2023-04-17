@@ -1,7 +1,7 @@
 #include "main.h"
+#include <stdlib.h>
 
-/**
- * read_textfile - reads the text file to print to the STDOUT
+/* read_textfile - reads the text file to print to the STDOUT
  * @filename:file name to be read
  * @letters: no of letters to be read
  *
@@ -12,35 +12,19 @@
 
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	int fd, length, i, result;
-	char *buffer;
-
-	if (filename == NULL)
-		return (0);
+	char *buf;
+	ssize_t fd;
+	ssize_t w;
+	ssize_t t;
 
 	fd = open(filename, O_RDONLY);
 	if (fd == -1)
 		return (0);
+	buf = malloc(sizeof(char) * letters);
+	t = read(fd, buf, letters);
+	w = write(STDOUT_FILENO, buf, t);
 
-	buffer = malloc(sizeof(char) * letters);
-	if (buffer == NULL)
-		return (0);
-
-	read(fd, buffer, letters);
-	buffer[letters] = '\0';
-
-	for (i = 0; buffer[i] != '\0'; i++)
-		length += 1;
-
-	result = close(fd);
-	if (result != 0)
-		exit(-1);
-
-	result = write(STDOUT_FILENO, buffer, length);
-	if (result != length)
-		return (0);
-
-	free(buffer);
-
-	return (length);
+	free(buf);
+	close(fd);
+	return (w);
 }
