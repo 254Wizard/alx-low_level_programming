@@ -1,90 +1,52 @@
 #include "main.h"
-#include <string.h>
-#include <elf.h>
-/**
- * print_error - Prints an error message to stderr and exits with code 98.
- * @message: Error message to be printed
- *
- * Description: This function prints the given error message to stderr and exits
- * with status code 98.
- */
-void print_error(char* message)
-{
-fprintf(stderr, "Error: %s\n", message);
-exit(98);
-}
 
+#define MAX 1204
+#define SE STDERR_FILENO
 /**
- * print_header_info - Prints the data contained in the ELF header.
- * @ehdr: A pointer to the ELF header structure.
- *
- * Description: This function prints the data contained in the ELF header
- * structure in the format specified in the prompt.
- */
-void print_header_info(Elf64_Ehdr *ehdr)
-{
-int i;
-printf("ELF Header:\n");
-printf("  Magic:   ");
-for (i = 0; i < EI_NIDENT; i++)
-{
-printf("%02x ", ehdr->e_ident[i]);
-}
-printf("\n");
-printf("  Class:                             %s\n", ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? "ELF64" : "Invalid class");
-printf("  Data:                              %s\n", ehdr->e_ident[EI_DATA] == ELFDATA2LSB ? "2's complement, little endian" : "Invalid data encoding");
-printf("  Version:                           %d (current)\n", ehdr->e_ident[EI_VERSION]);
-printf("  OS/ABI:                            %s\n", ehdr->e_ident[EI_OSABI] == 0 ? "UNIX System V ABI" : "Other ABI");
-printf("  ABI Version:                       %d\n", ehdr->e_ident[EI_ABIVERSION]);
-printf("  Type:                              %s\n", ehdr->e_type == ET_EXEC ? "EXEC (Executable file)" : ehdr->e_type == ET_DYN ? "DYN (Shared object file)" : "Invalid type");
-printf("  Entry point address:               %lx\n", ehdr->e_entry);
-}
-
-/**
- * check_elf - Checks if the file is an ELF file.
- * @e_ident: A pointer to an array containing the ELF magic numbers.
- *
- * Description: This function checks if the given file is an ELF file by
- * verifying the first 4 bytes of the file match the ELF magic number.
- * If the file is not an ELF file, it prints an error message to stderr and exits
- * with status code 98.
- */
-void check_elf(unsigned char *e_ident)
-{
-if (memcmp(e_ident, ELFMAG, SELFMAG) != 0)
-{
-print_error("File is not an ELF file");
-}
-}
-/**
- * main - reads and displays the data present in the ELF header
- * located at the beginning of an ELF file.
+ * main - displays data contained in ELF header at start of themfile.
  * @argc: Counts how many arguments were given to the program.
- * @argv: a collection of strings that represent the program's arguments.
+ * @args: argument strings
  * Return: 0 if successful, 98 if there was an error.
  */
-int main(int argc, char *argv[])
+int main(int argc, char *args[])
 {
-int fd;
-Elf64_Ehdr ehdr;
-ssize_t num_bytes_read;
-if (argc != 2)
-{
-print_error("Incorrect number of arguments");
+	int input_file, output_file, input, output;
+	char buffer[MAX];
+	mode_t mode;
+
+	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
+	if (argc != 3)
+		dprintf(SE, "Usage: cp file_from file_to\n"), exit(97);
+	input_file = open(args[1], O_RDONLY);
+
+	if (input_file == -1)
+		dprintf(SE, "Error: Can't read from file %s\n", args[1]), exit(98);
+	output_file = open(args[2], O_CREAT | O_WRONLY | O_TRUNC, mode);
+
+	if (output_file == -1)
+		dprintf(SE, "Error: Can't write to %s\n", args[2]), exit(99);
+
+	do {
+		input =  read(input_file, buffer, MAX);
+		if (input == -1)
+		{
+			dprintf(SE, "Error: Can't read from file %s\n", args[1]);
+			exit(98);
+		}
+		if (input > 0)
+		{
+			output = write(output_file, buffer, (ssize_t) input);
+			if (output == -1)
+				dprintf(SE, "Error: Can't write to %s\n", args[2]), exit(99);
+		}
+	} while (input > 0);
+
+	input = close(input_file);
+	if (input == -1)
+		dprintf(SE, "Error: Can't close file %d\n", input_file), exit(100);
+	output = close(output_file);
+	if (output == -1)
+		dprintf(SE, "Error: Can't close file %d\n", output_file), exit(100);
+	return (0);
 }
-fd = open(argv[1], O_RDONLY);
-if (fd == -1)
-{
-print_error("Unable to open file");
-}
-    
-num_bytes_read = read(fd, &ehdr, sizeof(Elf64_Ehdr));
-if (num_bytes_read != sizeof(Elf64_Ehdr))
-{
-print_error("Unable to read ELF header");
-}
-check_elf(ehdr.e_ident);
-print_header_info(&ehdr);
-close(fd);
-return (0);
-}
+
